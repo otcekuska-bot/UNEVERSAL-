@@ -1,6 +1,7 @@
 local P,L,R,TS,RS,Pl=game:GetService("Players").LocalPlayer,game:GetService("Lighting"),game:GetService("RunService"),game:GetService("TweenService"),game:GetService("ReplicatedStorage"),game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
 local lang,isOpen,korblox,headless,espEnabled,noclipEnabled,flyEnabled,infJumpEnabled,currentTab,skyIdx,animIdx,menuMusicPlaying,speedEnabled,jumpBoostEnabled,cloneSkinEnabled,bigHeadEnabled,allBigHeadEnabled,godModeEnabled,egorModeEnabled = "RU",false,false,false,false,false,false,false,"Visual",1,1,true,false,false,false,false,false,false,false
 
 local SkyList={
@@ -17,13 +18,12 @@ local SkyList={
 	{RU="Темная пустота",EN="Dark Void",id="268301540"}
 }
 
--- Музыка в SoundService
 local soundObj = SoundService:FindFirstChild("GooseHubRelaxingMusic")
 if not soundObj then
 	soundObj = Instance.new("Sound")
 	soundObj.Name = "GooseHubRelaxingMusic"
 	soundObj.SoundId = "rbxassetid://1848354536"
-	soundObj.Volume = 0.5
+	soundObj.Volume = 10
 	soundObj.Looped = true
 	soundObj.Parent = SoundService
 end
@@ -47,13 +47,13 @@ local AnimPacks={
 	{RU="Обычный (Свой)",EN="Default (Own)",ids=nil},
 	{RU="Ниндзя",EN="Ninja",ids={idle1="656117400",idle2="656118341",walk="656121766",run="656118852",jump="656117878",fall="656115606",climb="656114359",swim="656119721"}},
 	{RU="Игрушка",EN="Toy",ids={idle1="782841498",idle2="782845736",walk="782843345",run="782842708",jump="782847020",fall="782846423",climb="782843869",swim="782844582"}},
-	{RU="Зомби",EN="Zombie",ids={idle1="616158929",idle2="616160103",walk="616168032",run="616163682",jump="616161997",fall="616157476",climb="616156119",swim="616165109"}},
+	{RU="Зомби",EN="Zombie",ids={idle1="616158929",idle2="616160103",walk="616168032",run="616163682",jump="616161997",fall="616157476",climb="616157476",climb="616156119",swim="616165109"}},
 	{RU="Астронавт",EN="Astronaut",ids={idle1="891621366",idle2="891633237",walk="891667138",run="891636393",jump="891627522",fall="891617961",climb="891609353",swim="891651882"}}
 }
 
 local T={
 	RU={
-		Title="УНИВЕРСАЛЬНОЕ МЕНЮ",Auth="TikTok:ScriptVFXK",TabVisual="Визуал",TabPlayer="Игрок",TabMods="МОДС",TabTikTok="ТикТок",
+		Title="УНИВЕРСАЛЬНОЕ МЕНЮ",Auth="TikTok: ScriptVFXK",TabVisual="Визуал",TabPlayer="Игрок",TabMods="МОДС",TabTikTok="ТикТок",
 		Sky="Небо: ",MenuMusic="Музыка меню: ",Anim="Пак анимаций: ",InfJump="Бесконечный прыжок: ",NC="Ноклип: ",
 		FLY="Полёт: ",Speed="Быстрый бег: ",JumpBoost="Супер прыжок: ",GodMode="Бессмертие (God): ",EgorMode="Режим Егора: ",TP="Телепорт к игроку",TPPlaceholder="Введите ник игрока...",
 		CloneSkin="Клонировать скин (Визуал)",BigHead="Большая голова (Визуал)",AllBigHead="Головы всем (Визуал)",
@@ -66,14 +66,14 @@ local T={
 		LinkCopied="✅ Ссылка скопирована в буфер обмена!"
 	},
 	EN={
-		Title="UNIVERSAL MENU",Auth="TikTok:ScriptVFXK",TabVisual="Visual",TabPlayer="Player",TabMods="MODS",TabTikTok="TikTok",
+		Title="UNIVERSAL MENU",Auth="TikTok: ScriptVFXK",TabVisual="Visual",TabPlayer="Player",TabMods="MODS",TabTikTok="TikTok",
 		Sky="Sky: ",MenuMusic="Menu Music: ",Anim="Anim Pack: ",InfJump="Infinite Jump: ",NC="Noclip: ",
 		FLY="Fly: ",Speed="Fast Speed: ",JumpBoost="Super Jump: ",GodMode="God Mode: ",EgorMode="Egor Mode: ",TP="Teleport to Player",TPPlaceholder="Enter player username...",
 		CloneSkin="Clone Skin (Visual)",BigHead="Big Head (Visual)",AllBigHead="All Big Head (Visual)",
 		Korblox="Fake Korblox: ",Headless="Fake Headless: ",ESP="ESP: ",
 		ON="ON",OFF="OFF",UserTag="ScriptVFXK USERS",
 		LoadingSec="Loading (%d) sec...",LoadingDone="Loading Complete!",
-		LangSelect="ScriptVFXK welcomes://\nSelect language / Выберите язык:",
+		LangSelect="ScriptVFXK welcomes:\nSelect language / Выберите язык:",
 		TikTokInfo="👋 Hello everyone! I am a beginner ROBLOXer and scripter!\n\nThis is my very first script that I created with a lot of soul and effort for you. I hope you enjoy it!\n\n📱 Be sure to check out my TikTok account, subscribe and support me!\n\n🔗 Click the button below to copy the link or open the TikTok profile:",
 		CopyLink="📋 Copy TikTok Link",
 		LinkCopied="✅ Link copied to clipboard!"
@@ -85,7 +85,6 @@ local function tw(o,t,p) TS:Create(o,TweenInfo.new(t,Enum.EasingStyle.Quart,Enum
 
 local Gui = cObj("ScreenGui", P:WaitForChild("PlayerGui"), {Name="GooseHub", ResetOnSpawn=false, IgnoreGuiInset=true})
 
--- ПОЛНОЭКРАННАЯ ЗАГРУЗКА
 local LoadFrame = cObj("Frame", Gui, {Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(0,0,0), ZIndex=200})
 local LoadTitle = cObj("TextLabel", LoadFrame, {Size=UDim2.new(0,500,0,60), Position=UDim2.new(0.5,-250,0.45,-30), BackgroundTransparency=1, Text=string.format(T[lang].LoadingSec, 3), TextColor3=Color3.fromRGB(255,255,255), TextSize=26, Font=Enum.Font.GothamBold, TextXAlignment=Enum.TextXAlignment.Center, ZIndex=201})
 local LoadBarBg = cObj("Frame", LoadFrame, {Size=UDim2.new(0,320,0,6), Position=UDim2.new(0.5,-160,0.5,30), BackgroundColor3=Color3.fromRGB(20,20,20), ZIndex=201})
@@ -108,7 +107,6 @@ tw(LoadBarBg, 0.4, {BackgroundTransparency=1})
 tw(LoadBar, 0.4, {BackgroundTransparency=1})
 task.wait(0.4) LoadFrame:Destroy()
 
--- ОКНО ВЫБОРА ЯЗЫКА
 local LangFrame = cObj("Frame", Gui, {Size=UDim2.new(1,0,1,0), BackgroundColor3=Color3.fromRGB(0,0,0), BackgroundTransparency=0.4, ZIndex=100})
 local LangSelectBox = cObj("Frame", LangFrame, {Size=UDim2.new(0,340,0,240), Position=UDim2.new(0.5,-170,0.5,-120), BackgroundColor3=Color3.fromRGB(18,18,26), ZIndex=101})
 cObj("UICorner", LangSelectBox, {CornerRadius=UDim.new(0,16)})
@@ -130,7 +128,6 @@ tw(LangFrame, 0.4, {BackgroundTransparency=1})
 tw(LangSelectBox, 0.4, {Size=UDim2.new(0,0,0,0)})
 task.wait(0.4) LangFrame:Destroy()
 
--- СИСТЕМА МАРКИРОВКИ НАД ГОЛОВОЙ
 local userTags = {}
 local function createHeadTag(plr)
 	if not plr or not plr.Character then return end
@@ -300,7 +297,6 @@ Pl.PlayerAdded:Connect(function(plr)
 	end)
 end)
 
--- ПЕРЕХВАТ УРОНА И СМЕРТИ (GOD MODE)
 local godConn = nil
 local function setupGodMode(char)
 	if godConn then godConn:Disconnect() godConn = nil end
@@ -328,7 +324,6 @@ local customFovEnabled = false
 local bg, bv = nil, nil
 
 R.Stepped:Connect(function()
-    -- ПОСТОЯННОЕ ОБНОВЛЕНИЕ FOV
 	if customFovEnabled then
 		pcall(function() workspace.CurrentCamera.FieldOfView = currentFov end)
 	end
@@ -394,7 +389,7 @@ R.Stepped:Connect(function()
 	end
 end)
 
-game:GetService("UserInputService").JumpRequest:Connect(function()
+UserInputService.JumpRequest:Connect(function()
 	if infJumpEnabled and P.Character then
 		local hum = P.Character:FindFirstChildOfClass("Humanoid")
 		if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
@@ -405,14 +400,13 @@ local DragBtn = cObj("TextButton", Gui, {Size=UDim2.new(0,42,0,42), Position=UDi
 cObj("UICorner", DragBtn, {CornerRadius=UDim.new(1,0)})
 local DragStroke = cObj("UIStroke", DragBtn, {Color=Color3.fromRGB(255,200,100), Thickness=2})
 
-local Main = cObj("Frame", Gui, {Size=UDim2.new(0,300,0,400), Position=UDim2.new(0.02,0,0.28,0), BackgroundColor3=Color3.fromRGB(15,15,22), Active=true, Draggable=true, ClipsDescendants=true})
+local Main = cObj("Frame", Gui, {Size=UDim2.new(0,300,0,400), Position=UDim2.new(0.02,0,0.36,0), BackgroundColor3=Color3.fromRGB(15,15,22), Active=true, Draggable=true, ClipsDescendants=true})
 cObj("UICorner", Main, {CornerRadius=UDim.new(0,16)})
 local MainStroke = cObj("UIStroke", Main, {Color=Color3.fromRGB(255,180,80), Thickness=1.5})
 local GooseImg = cObj("ImageLabel", Main, {Size=UDim2.new(1.1,0,1.1,0), Position=UDim2.new(-0.05,0,-0.05,0), Image="rbxassetid://9459521367", ImageTransparency=0.5, BackgroundTransparency=1, ScaleType=Enum.ScaleType.Crop})
 local Title = cObj("TextLabel", Main, {Size=UDim2.new(1,0,0,35), BackgroundColor3=Color3.fromRGB(30,25,35), BackgroundTransparency=0.4, TextSize=13, Font=Enum.Font.Gotham, ZIndex=5})
 cObj("UICorner", Title, {CornerRadius=UDim.new(0,16)})
 
--- 4 ВКЛАДКИ
 local TabBar = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,-14,0,32), Position=UDim2.new(0,7,0,38), BackgroundTransparency=1, CanvasSize=UDim2.new(0,380,0,0), ScrollBarThickness=0, Active=false, ZIndex=10})
 local TabVisualBtn = cObj("TextButton", TabBar, {Size=UDim2.new(0,68,1,-2), Position=UDim2.new(0,0,0,0), BackgroundColor3=Color3.fromRGB(45,35,60), BackgroundTransparency=0.2, TextColor3=Color3.fromRGB(255,220,150), TextSize=9, Font=Enum.Font.GothamBold, ZIndex=11})
 cObj("UICorner", TabVisualBtn, {CornerRadius=UDim.new(0,8)})
@@ -424,10 +418,9 @@ local TabTikTokBtn = cObj("TextButton", TabBar, {Size=UDim2.new(0,92,1,-2), Posi
 cObj("UICorner", TabTikTokBtn, {CornerRadius=UDim.new(0,8)})
 cObj("UIStroke", TabTikTokBtn, {Color=Color3.fromRGB(0,170,255), Thickness=1, Transparency=0.3})
 
--- Обновил CanvasSize для Visual, чтобы влез ползунок
-local ScrollVisual = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,400), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=true, ZIndex=3})
+local ScrollVisual = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,380), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=true, ZIndex=3})
 local ScrollPlayer = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,710), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=false, ZIndex=3})
-local ScrollMods = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,210), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=false, ZIndex=3})
+local ScrollMods = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,300), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=false, ZIndex=3})
 local ScrollTikTok = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,380), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(0,170,255), Active=true, Visible=false, ZIndex=3})
 
 local Auth = cObj("TextLabel", Main, {Size=UDim2.new(1,0,0,15), Position=UDim2.new(0,0,1,-18), BackgroundTransparency=1, TextColor3=Color3.fromRGB(255,220,150), TextSize=10, Font=Enum.Font.Gotham, ZIndex=5})
@@ -451,11 +444,10 @@ local KbB = btn(ScrollVisual,160,Color3.fromRGB(35,35,50)) KbB.Size,KbB.Position
 local HlB = btn(ScrollVisual,210,Color3.fromRGB(35,35,50)) HlB.Size,HlB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,210)
 local EspB = btn(ScrollVisual,260,Color3.fromRGB(35,35,50)) EspB.Size,EspB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,260)
 
--- НОВЫЙ СЛАЙДЕР FOV
 local FovFrame = cObj("Frame", ScrollVisual, {Size=UDim2.new(0.86,0,0,36), Position=UDim2.new(0.07,0,0,310), BackgroundColor3=Color3.fromRGB(35,35,50), BackgroundTransparency=0.3, ZIndex=4})
 cObj("UICorner", FovFrame, {CornerRadius=UDim.new(0,10)})
 cObj("UIStroke", FovFrame, {Color=Color3.fromRGB(255,220,150), Transparency=0.7, Thickness=1})
-local FovFill = cObj("Frame", FovFrame, {Size=UDim2.new(0.25,0,1,0), BackgroundColor3=Color3.fromRGB(40,130,75), ZIndex=4})
+local FovFill = cObj("Frame", FovFrame, {Size=UDim2.new((70-10)/(120-10),0,1,0), BackgroundColor3=Color3.fromRGB(40,130,75), ZIndex=4})
 cObj("UICorner", FovFill, {CornerRadius=UDim.new(0,10)})
 local FovText = cObj("TextLabel", FovFrame, {Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text="FOV: 70", TextColor3=Color3.new(1,1,1), TextSize=12, Font=Enum.Font.Gotham, ZIndex=5})
 local FovBtn = cObj("TextButton", FovFrame, {Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text="", ZIndex=6})
@@ -467,7 +459,7 @@ FovBtn.InputBegan:Connect(function(input)
 		customFovEnabled = true
 	end
 end)
-game:GetService("UserInputService").InputEnded:Connect(function(input)
+UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		draggingFov = false
 	end
@@ -475,7 +467,6 @@ end)
 
 local LangPlayerB = btn(ScrollPlayer,10,Color3.fromRGB(50,40,65)) LangPlayerB.Size,LangPlayerB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,10)
 local AnimPrev,AnimB,AnimNext = navBtn(ScrollPlayer,60,"◄",0.04),btn(ScrollPlayer,60,Color3.fromRGB(55,40,85)),navBtn(ScrollPlayer,60,"►",0.86)
-
 local InfJumpB = btn(ScrollPlayer,110,Color3.fromRGB(35,35,50)) InfJumpB.Size,InfJumpB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,110)
 local NcB = btn(ScrollPlayer,160,Color3.fromRGB(35,35,50)) NcB.Size,NcB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,160)
 local FlyB = btn(ScrollPlayer,210,Color3.fromRGB(35,35,50)) FlyB.Size,FlyB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,210)
@@ -494,52 +485,17 @@ local CloneSkinB = btn(ScrollMods,60,Color3.fromRGB(35,35,50)) CloneSkinB.Size,C
 local BigHeadB = btn(ScrollMods,110,Color3.fromRGB(35,35,50)) BigHeadB.Size,BigHeadB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,110)
 local AllBigHeadB = btn(ScrollMods,160,Color3.fromRGB(35,35,50)) AllBigHeadB.Size,AllBigHeadB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,160)
 
--- КОМПОНЕНТЫ ВКЛАДКИ ТИКТОК
 local LangTikTokB = btn(ScrollTikTok,10,Color3.fromRGB(50,40,65)) LangTikTokB.Size,LangTikTokB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,10)
-
-local TikTokTextLabel = cObj("TextLabel", ScrollTikTok, {
-	Size = UDim2.new(0.86,0,0,210),
-	Position = UDim2.new(0.07,0,0,60),
-	BackgroundTransparency = 1,
-	Text = T[lang].TikTokInfo,
-	TextColor3 = Color3.fromRGB(230,230,250),
-	TextSize = 12,
-	Font = Enum.Font.Gotham,
-	TextXAlignment = Enum.TextXAlignment.Left,
-	TextYAlignment = Enum.TextYAlignment.Top,
-	TextWrapped = true,
-	ZIndex = 4
-})
-
-local TikTokBtn = cObj("TextButton", ScrollTikTok, {
-	Size = UDim2.new(0.86,0,0,45),
-	Position = UDim2.new(0.07,0,0,285),
-	BackgroundColor3 = Color3.fromRGB(15,25,45),
-	BackgroundTransparency = 0.2,
-	Text = T[lang].CopyLink,
-	TextColor3 = Color3.fromRGB(100,200,255),
-	TextSize = 12,
-	Font = Enum.Font.GothamBold,
-	ZIndex = 4
-})
+local TikTokTextLabel = cObj("TextLabel", ScrollTikTok, {Size=UDim2.new(0.86,0,0,210), Position=UDim2.new(0.07,0,0,60), BackgroundTransparency=1, Text=T[lang].TikTokInfo, TextColor3=Color3.fromRGB(230,230,250), TextSize=12, Font=Enum.Font.Gotham, TextXAlignment=Enum.TextXAlignment.Left, TextYAlignment=Enum.TextYAlignment.Top, TextWrapped=true, ZIndex=4})
+local TikTokBtn = cObj("TextButton", ScrollTikTok, {Size=UDim2.new(0.86,0,0,45), Position=UDim2.new(0.07,0,0,285), BackgroundColor3=Color3.fromRGB(15,25,45), BackgroundTransparency=0.2, Text=T[lang].CopyLink, TextColor3=Color3.fromRGB(100,200,255), TextSize=12, Font=Enum.Font.GothamBold, ZIndex=4})
 cObj("UICorner", TikTokBtn, {CornerRadius=UDim.new(0,10)})
-local TikTokBtnStroke = cObj("UIStroke", TikTokBtn, {
-	Color = Color3.fromRGB(0,170,255),
-	Thickness = 1.5,
-	Transparency = 0.2
-})
+local TikTokBtnStroke = cObj("UIStroke", TikTokBtn, {Color=Color3.fromRGB(0,170,255), Thickness=1.5, Transparency=0.2})
 
 TikTokBtn.MouseButton1Click:Connect(function()
 	local link = "www.tiktok.com/@scriptvfxk"
+	pcall(function() setclipboard(link) end)
 	pcall(function()
-		setclipboard(link)
-	end)
-	pcall(function()
-		StarterGui:SetCore("SendNotification", {
-			Title = "TikTok: ScriptVFXK",
-			Text = T[lang].LinkCopied,
-			Duration = 3
-		})
+		StarterGui:SetCore("SendNotification", {Title="TikTok: ScriptVFXK", Text=T[lang].LinkCopied, Duration=3})
 	end)
 end)
 
@@ -550,18 +506,16 @@ R.RenderStepped:Connect(function(dt)
 	Title.TextColor3,DragBtn.TextColor3,DragStroke.Color,MainStroke.Color = c,c,c,c
 	GooseImg.Position = UDim2.new(-0.05,math.sin(t*1.5)*5,-0.05,math.cos(t*1.5)*5)
 	
-	-- Логика обновления FOV слайдера
 	if draggingFov then
-		local mousePos = game:GetService("UserInputService"):GetMouseLocation().X
+		local mousePos = UserInputService:GetMouseLocation().X
 		local framePos = FovFrame.AbsolutePosition.X
 		local frameSize = FovFrame.AbsoluteSize.X
 		local percent = math.clamp((mousePos - framePos) / frameSize, 0, 1)
-		currentFov = math.floor(10 + (240 * percent))
+		currentFov = math.floor(10 + (110 * percent))
 		FovFill.Size = UDim2.new(percent, 0, 1, 0)
 		FovText.Text = "FOV: " .. currentFov
 	end
 
-	-- Эффект синей пульсирующей подсветки кнопки ТикТок
 	local glowVal = (math.sin(t * 4) + 1) / 2
 	TikTokBtnStroke.Transparency = 0.1 + glowVal * 0.4
 end)
@@ -591,7 +545,7 @@ TabTikTokBtn.MouseButton1Click:Connect(function() switchTab("TikTok") end)
 local function updateUI()
 	local d = T[lang]
 	Title.Text = d.Title
-	Auth.Text = "TikTok:ScriptVFXK"
+	Auth.Text = "TikTok: ScriptVFXK"
 	TabVisualBtn.Text = "👁️ " .. d.TabVisual
 	TabPlayerBtn.Text = "👤 " .. d.TabPlayer
 	TabModsBtn.Text = "⚡ " .. d.TabMods
@@ -744,7 +698,7 @@ end)
 
 if P.Character then 
 	saveOriginalAnims(P.Character)
-	setupGodMode(P.Character)
+	setupGodManager = setupGodMode(P.Character)
 end
 
 setSky(1) updateUI() switchTab("Visual")
