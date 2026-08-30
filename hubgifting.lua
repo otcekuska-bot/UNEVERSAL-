@@ -322,9 +322,17 @@ local function setupGodMode(char)
 	end)
 end
 
+local currentFov = 70
+local customFovEnabled = false
+
 local bg, bv = nil, nil
 
 R.Stepped:Connect(function()
+    -- ПОСТОЯННОЕ ОБНОВЛЕНИЕ FOV
+	if customFovEnabled then
+		pcall(function() workspace.CurrentCamera.FieldOfView = currentFov end)
+	end
+
 	if noclipEnabled and P.Character then
 		local hrp = P.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
@@ -416,7 +424,8 @@ local TabTikTokBtn = cObj("TextButton", TabBar, {Size=UDim2.new(0,92,1,-2), Posi
 cObj("UICorner", TabTikTokBtn, {CornerRadius=UDim.new(0,8)})
 cObj("UIStroke", TabTikTokBtn, {Color=Color3.fromRGB(0,170,255), Thickness=1, Transparency=0.3})
 
-local ScrollVisual = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,360), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=true, ZIndex=3})
+-- Обновил CanvasSize для Visual, чтобы влез ползунок
+local ScrollVisual = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,400), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=true, ZIndex=3})
 local ScrollPlayer = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,710), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=false, ZIndex=3})
 local ScrollMods = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,210), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(255,200,100), Active=true, Visible=false, ZIndex=3})
 local ScrollTikTok = cObj("ScrollingFrame", Main, {Size=UDim2.new(1,0,1,-90), Position=UDim2.new(0,0,0,72), BackgroundTransparency=1, CanvasSize=UDim2.new(0,0,0,380), ScrollBarThickness=4, ScrollBarImageColor3=Color3.fromRGB(0,170,255), Active=true, Visible=false, ZIndex=3})
@@ -441,6 +450,28 @@ local MenuMusicB = btn(ScrollVisual,110,Color3.fromRGB(40,130,75)) MenuMusicB.Si
 local KbB = btn(ScrollVisual,160,Color3.fromRGB(35,35,50)) KbB.Size,KbB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,160)
 local HlB = btn(ScrollVisual,210,Color3.fromRGB(35,35,50)) HlB.Size,HlB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,210)
 local EspB = btn(ScrollVisual,260,Color3.fromRGB(35,35,50)) EspB.Size,EspB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,260)
+
+-- НОВЫЙ СЛАЙДЕР FOV
+local FovFrame = cObj("Frame", ScrollVisual, {Size=UDim2.new(0.86,0,0,36), Position=UDim2.new(0.07,0,0,310), BackgroundColor3=Color3.fromRGB(35,35,50), BackgroundTransparency=0.3, ZIndex=4})
+cObj("UICorner", FovFrame, {CornerRadius=UDim.new(0,10)})
+cObj("UIStroke", FovFrame, {Color=Color3.fromRGB(255,220,150), Transparency=0.7, Thickness=1})
+local FovFill = cObj("Frame", FovFrame, {Size=UDim2.new(0.25,0,1,0), BackgroundColor3=Color3.fromRGB(40,130,75), ZIndex=4})
+cObj("UICorner", FovFill, {CornerRadius=UDim.new(0,10)})
+local FovText = cObj("TextLabel", FovFrame, {Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text="FOV: 70", TextColor3=Color3.new(1,1,1), TextSize=12, Font=Enum.Font.Gotham, ZIndex=5})
+local FovBtn = cObj("TextButton", FovFrame, {Size=UDim2.new(1,0,1,0), BackgroundTransparency=1, Text="", ZIndex=6})
+
+local draggingFov = false
+FovBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		draggingFov = true
+		customFovEnabled = true
+	end
+end)
+game:GetService("UserInputService").InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		draggingFov = false
+	end
+end)
 
 local LangPlayerB = btn(ScrollPlayer,10,Color3.fromRGB(50,40,65)) LangPlayerB.Size,LangPlayerB.Position = UDim2.new(0.86,0,0,36),UDim2.new(0.07,0,0,10)
 local AnimPrev,AnimB,AnimNext = navBtn(ScrollPlayer,60,"◄",0.04),btn(ScrollPlayer,60,Color3.fromRGB(55,40,85)),navBtn(ScrollPlayer,60,"►",0.86)
@@ -519,6 +550,17 @@ R.RenderStepped:Connect(function(dt)
 	Title.TextColor3,DragBtn.TextColor3,DragStroke.Color,MainStroke.Color = c,c,c,c
 	GooseImg.Position = UDim2.new(-0.05,math.sin(t*1.5)*5,-0.05,math.cos(t*1.5)*5)
 	
+	-- Логика обновления FOV слайдера
+	if draggingFov then
+		local mousePos = game:GetService("UserInputService"):GetMouseLocation().X
+		local framePos = FovFrame.AbsolutePosition.X
+		local frameSize = FovFrame.AbsoluteSize.X
+		local percent = math.clamp((mousePos - framePos) / frameSize, 0, 1)
+		currentFov = math.floor(10 + (240 * percent))
+		FovFill.Size = UDim2.new(percent, 0, 1, 0)
+		FovText.Text = "FOV: " .. currentFov
+	end
+
 	-- Эффект синей пульсирующей подсветки кнопки ТикТок
 	local glowVal = (math.sin(t * 4) + 1) / 2
 	TikTokBtnStroke.Transparency = 0.1 + glowVal * 0.4
